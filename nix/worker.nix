@@ -1,7 +1,8 @@
-{ config
-, pkgs
-, lib
-, ...
+{
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   cfg = config.services.buildbot-nix.worker;
@@ -56,16 +57,21 @@ in
     systemd.services.buildbot-worker = {
       reloadIfChanged = true;
       description = "Buildbot Worker.";
-      after = [ "network.target" "buildbot-master.service" ];
+      after = [
+        "network.target"
+        "buildbot-master.service"
+      ];
       wantedBy = [ "multi-user.target" ];
       path = [
         pkgs.cachix
+        pkgs.attic
         pkgs.git
         pkgs.openssh
         pkgs.nix
         pkgs.nix-eval-jobs
+        pkgs.coreutils
       ];
-      environment.PYTHONPATH = "${python.withPackages (_: [cfg.package])}/${python.sitePackages}";
+      environment.PYTHONPATH = "${python.withPackages (_: [ cfg.package ])}/${python.sitePackages}";
       environment.MASTER_URL = cfg.masterUrl;
       environment.BUILDBOT_DIR = buildbotDir;
 

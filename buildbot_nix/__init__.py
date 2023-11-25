@@ -241,6 +241,7 @@ class NixBuildCommand(buildstep.ShellMixin, steps.BuildStep):
     """Builds a nix derivation."""
 
     def __init__(self, **kwargs: Any) -> None:
+        self.timeout = 7200
         kwargs = self.setupShellMixin(kwargs)
         super().__init__(**kwargs)
 
@@ -391,15 +392,11 @@ def nix_eval_config(
                 str(worker_count),
                 "--max-memory-size",
                 str(max_memory_size),
-                "--option",
-                "accept-flake-config",
-                "true",
                 "--gc-roots-dir",
                 drv_gcroots_dir,
                 "--force-recurse",
-                "--check-cache-status",
-                "--flake",
-                ".#checks",
+                "--expr",
+                "let out = import ./.; in out.checks",
             ],
             haltOnFailure=True,
             locks=[eval_lock.access("exclusive")],
@@ -475,19 +472,18 @@ def nix_build_config(
             haltOnFailure=True,
         ),
     )
-    if cachix:
-        factory.addStep(
-            steps.ShellCommand(
-                name="Upload cachix",
-                env=cachix.cachix_env(),
-                command=[
-                    "cachix",
-                    "push",
-                    cachix.name,
-                    util.Interpolate("result-%(prop:attr)s"),
-                ],
-            ),
+    factory.addStep(
+        steps.ShellCommand(
+            name="Upload attic",
+            env={},
+            command=[
+                "attic",
+                "push",
+                "julien",
+                util.Interpolate("result-%(prop:attr)s"),
+            ],
         )
+    )
 
     factory.addStep(
         steps.ShellCommand(
