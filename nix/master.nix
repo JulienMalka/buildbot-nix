@@ -1,7 +1,8 @@
-{ config
-, pkgs
-, lib
-, ...
+{
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   cfg = config.services.buildbot-nix.master;
@@ -315,7 +316,6 @@ in
         ps.treq
         ps.psycopg2
         (ps.toPythonModule pkgs.buildbot-worker)
-        pkgs.buildbot-plugins.www-react
         (pkgs.python3.pkgs.callPackage ../default.nix { })
         (pkgs.python3.pkgs.callPackage ./buildbot-gitea.nix { buildbot = pkgs.buildbot; })
       ];
@@ -329,14 +329,12 @@ in
           [ "buildbot-nix-workers:${cfg.workersFile}" ]
           ++ lib.optional (cfg.authBackend == "gitea") "gitea-oauth-secret:${cfg.gitea.oauthSecretFile}"
           ++ lib.optional (cfg.authBackend == "github") "github-oauth-secret:${cfg.github.oauthSecretFile}"
-          ++ lib.optional
-            (
-              cfg.cachix.signingKeyFile != null
-            ) "cachix-signing-key:${builtins.toString cfg.cachix.signingKeyFile}"
-          ++ lib.optional
-            (
-              cfg.cachix.authTokenFile != null
-            ) "cachix-auth-token:${builtins.toString cfg.cachix.authTokenFile}"
+          ++ lib.optional (
+            cfg.cachix.signingKeyFile != null
+          ) "cachix-signing-key:${builtins.toString cfg.cachix.signingKeyFile}"
+          ++ lib.optional (
+            cfg.cachix.authTokenFile != null
+          ) "cachix-auth-token:${builtins.toString cfg.cachix.authTokenFile}"
           ++ lib.optionals (cfg.github.enable) [
             "github-token:${cfg.github.tokenFile}"
             "github-webhook-secret:${cfg.github.webhookSecretFile}"
