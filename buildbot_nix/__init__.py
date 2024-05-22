@@ -415,7 +415,7 @@ def nix_eval_config(
     )
 
     return util.BuilderConfig(
-        name=f"{project.name}/nix-eval",
+        name=f"{project.name.replace('/', '_')}_nix-eval",
         workernames=worker_names,
         project=project.name,
         factory=factory,
@@ -516,7 +516,7 @@ def nix_build_config(
             ),
         )
     return util.BuilderConfig(
-        name=f"{project.name}/nix-build",
+        name=f"{project.name.replace('/', '_')}_nix-build",
         project=project.name,
         workernames=worker_names,
         collapseRequests=False,
@@ -548,7 +548,7 @@ def nix_skipped_build_config(
         ),
     )
     return util.BuilderConfig(
-        name=f"{project.name}/nix-skipped-build",
+        name=f"{project.name.replace('/', '_')}_nix-skipped-build",
         project=project.name,
         workernames=worker_names,
         collapseRequests=False,
@@ -577,7 +577,7 @@ def config_for_project(
                     repository=project.url,
                     filter_fn=lambda c: c.branch == project.default_branch,
                 ),
-                builderNames=[f"{project.name}/nix-eval"],
+                builderNames=[f"{project.name.replace('/', '_')}_nix-eval"],
                 treeStableTimer=5,
             ),
             # this is compatible with bors or github's merge queue
@@ -587,7 +587,7 @@ def config_for_project(
                     repository=project.url,
                     branch_re="(gh-readonly-queue/.*|staging|trying)",
                 ),
-                builderNames=[f"{project.name}/nix-eval"],
+                builderNames=[f"{project.name.replace('/', '_')}_nix-eval"],
             ),
             # build all pull requests
             schedulers.SingleBranchScheduler(
@@ -596,22 +596,22 @@ def config_for_project(
                     repository=project.url,
                     category="pull",
                 ),
-                builderNames=[f"{project.name}/nix-eval"],
+                builderNames=[f"{project.name.replace('/', '_')}_nix-eval"],
             ),
             # this is triggered from `nix-eval`
             schedulers.Triggerable(
                 name=f"{project.project_id}-nix-build",
-                builderNames=[f"{project.name}/nix-build"],
+                builderNames=[f"{project.name.replace('/', '_')}_nix-build"],
             ),
             # this is triggered from `nix-eval` when the build is skipped
             schedulers.Triggerable(
                 name=f"{project.project_id}-nix-skipped-build",
-                builderNames=[f"{project.name}/nix-skipped-build"],
+                builderNames=[f"{project.name.replace('/', '_')}_nix-skipped-build"],
             ),
             # allow to manually trigger a nix-build
             schedulers.ForceScheduler(
                 name=f"{project.project_id}-force",
-                builderNames=[f"{project.name}/nix-eval"],
+                builderNames=[f"{project.name.replace('/', '_')}_nix-eval"],
                 properties=[
                     util.StringParameter(
                         name="project",
