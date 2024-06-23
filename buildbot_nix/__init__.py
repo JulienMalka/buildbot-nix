@@ -125,6 +125,10 @@ class BuildTrigger(Trigger):
             props.setProperty("system", system, source)
             props.setProperty("drv_path", drv_path, source)
             props.setProperty("out_path", out_path, source)
+            if self.project.name == "SaumonNet/proxmox-nixos":
+                props.setProperty("attic-cache", "proxmox-nixos", source)
+            else:
+                props.setProperty("attic-cache", "julien", source)
             # we use this to identify builds when running a retry
             props.setProperty("build_uuid", str(uuid.uuid4()), source)
 
@@ -479,7 +483,7 @@ def nix_build_config(
             command=[
                 "attic",
                 "push",
-                "julien",
+                util.Interpolate("%(prop:attic-cache)s"),
                 util.Interpolate("result-%(prop:attr)s"),
             ],
         )
