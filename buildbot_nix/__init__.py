@@ -480,6 +480,7 @@ def nix_build_config(
         steps.ShellCommand(
             name="Upload attic",
             env={},
+            flunkOnFailure=False,
             command=[
                 "attic",
                 "push",
